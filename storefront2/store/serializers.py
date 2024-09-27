@@ -14,7 +14,7 @@ class CollectionSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'title', 'unit_price', 'price_with_tax', 'collection']
+        fields = ['id', 'title', 'slug', 'description', 'inventory', 'unit_price', 'price_with_tax', 'collection']
     # id = serializers.IntegerField()
     # title = serializers.CharField(max_length=255)
     # price = serializers.DecimalField(max_digits=6, decimal_places=2, source="unit_price")
@@ -30,3 +30,12 @@ class ProductSerializer(serializers.ModelSerializer):
     # )
     def calculate_tax(self, product: Product):
         return product.unit_price*Decimal(1.1)
+    
+    # if we need to add extra data validations when desrializing
+    # we can re-define this method which is already implemented in ModelSerializer
+    # def validate(self, data):
+    #     if "password" not in data:
+    #         return serializers.ValidationError('Bad post')
+    #     if not data['password']:
+    #         return serializers.ValidationError('Bad post')
+    #     return data

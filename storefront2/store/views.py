@@ -7,24 +7,36 @@ from .models import Product
 from .serializers import ProductSerializer
 
 
-@api_view()
+@api_view(['GET', 'POST'])
 def product_list(request):
-    queryset = Product.objects.select_related('collection').all()
-    # many=true is to tell serializer to convert the whole queryset one by one to dict
-    serializer = ProductSerializer(queryset, many=True, 
-                                   context={'request': request})
-    return Response(serializer.data)
-
-@api_view()
-def product_detail(request, id):
-    try: 
-        product = Product.objects.get(pk=id)
-        # serializer will convert our product to dictionary
-        serializer = ProductSerializer(product)
+    if request.method == 'GET':
+        queryset = Product.objects.select_related('collection').all()
+        # many=true is to tell serializer to convert the whole queryset one by one to dict
+        serializer = ProductSerializer(queryset, many=True, 
+                                    context={'request': request})
         return Response(serializer.data)
-    except Product.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    
+    elif request.method == 'POST':
+        serializer = ProductSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET', 'PUT'])
+def product_detail(request, id):
+    product = Product.objects.get(pk=id)
+    if request.method == 'GET':
+        try: 
+            # serializer will convert our product to dictionary
+            serializer = ProductSerializer(product)
+            return Response(serializer.data)
+        except Product.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    elif request.method == 'PUT':
+        serializer = ProductSerializer(product, data = request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
 @api_view()
 def collection_detail(request, pk):
     return Response('ok')
